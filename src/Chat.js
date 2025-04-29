@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import "./Chat.css";
 
-const socket = io("http://localhost:5000"); // change to backend URL
+// const socket = io("http://localhost:5000"); // change to backend URL
+const socket = io("https://chat-backend-uj3u.onrender.com");
 
 const Chat = () => {
   const [username, setUsername] = useState("");
