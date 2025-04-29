@@ -2,25 +2,34 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import "./Chat.css";
 
-const socket = io("https://chat-backend-uj3u.onrender.com");
+const socket = io("http://localhost:5000"); // change to backend URL
 
 const Chat = () => {
-  const [username, setUsername] = useState(""); // To store the username
+  const [username, setUsername] = useState("");
+  const [isUsernameSubmitted, setIsUsernameSubmitted] = useState(false);
+
+  const [recipient, setRecipient] = useState("");
+  const [newRecipient, setNewRecipient] = useState("");
+  const [activeChats, setActiveChats] = useState([]);
+
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
-  const [recipient, setRecipient] = useState(""); // For recipient's username
-  const [isUsernameSubmitted, setIsUsernameSubmitted] = useState(false); // To check if username is submitted
-  const [activeChats, setActiveChats] = useState([]); // Store active chats for multiple recipients
-  const [newRecipient, setNewRecipient] = useState(""); // New recipient for new chat
 
+  // Register user and set up chat listener
   useEffect(() => {
     if (username && isUsernameSubmitted) {
-      // Register the user when they enter a username
       socket.emit("register_user", username);
     }
 
+    // Listen to messages from the socket server
     const handleReceiveMessage = (data) => {
-      setChat((prev) => [...prev, data]);
+      // Check if the received message matches the active chat
+      if (
+        (data.sender === recipient && data.recipient === username) ||
+        (data.sender === username && data.recipient === recipient)
+      ) {
+        setChat((prev) => [...prev, data]);
+      }
     };
 
     socket.on("receive_message", handleReceiveMessage);
@@ -28,31 +37,48 @@ const Chat = () => {
     return () => {
       socket.off("receive_message", handleReceiveMessage);
     };
-  }, [username, isUsernameSubmitted]);
+  }, [username, recipient, isUsernameSubmitted]);
 
-  const sendMessage = (recipient) => {
-    if (message.trim() && recipient) {
-      socket.emit("send_message", { message, username, recipient });
-      setMessage(""); // Clear message input
+  // Fetch previous messages between sender and recipient
+  useEffect(() => {
+    if (recipient) {
+      socket.emit("load_messages", { sender: username, recipient });
+
+      socket.on("previous_messages", (messages) => {
+        setChat(messages);
+      });
+
+      return () => socket.off("previous_messages");
     }
-  };
+  }, [recipient, username]);
 
   const handleSubmitUsername = () => {
     if (username.trim()) {
-      setIsUsernameSubmitted(true); // Mark username as submitted
+      setIsUsernameSubmitted(true);
     }
   };
 
   const addChatWindow = () => {
     if (newRecipient.trim() && !activeChats.includes(newRecipient)) {
-      setActiveChats((prevChats) => [...prevChats, newRecipient]);
-      setNewRecipient(""); // Clear the new recipient input
+      setActiveChats((prev) => [...prev, newRecipient]);
+      setRecipient(newRecipient);
+      setNewRecipient("");
+    }
+  };
+
+  const sendMessage = () => {
+    if (message.trim() && recipient) {
+      socket.emit("send_message", {
+        sender: username,
+        recipient,
+        message,
+      });
+      setMessage("");
     }
   };
 
   return (
     <div className="chat-container">
-      {/* Left Sidebar */}
       {!isUsernameSubmitted ? (
         <div className="login-container">
           <input
@@ -65,20 +91,20 @@ const Chat = () => {
         </div>
       ) : (
         <div className="chat-wrapper">
-          {/* Sidebar with Active Chats */}
+          {/* Sidebar - Active Chats */}
           <div className="sidebar">
-            <h3>Recipient</h3>
-            <input
-              type="text"
-              placeholder="Recipient username"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-            />
-            <button onClick={() => sendMessage(recipient)}>Send</button>
-            
-            {/* Add New Chat */}
+            <h3>Chats</h3>
+            {activeChats.map((chatUser, index) => (
+              <button
+                key={index}
+                className={recipient === chatUser ? "active" : ""}
+                onClick={() => setRecipient(chatUser)}
+              >
+                {chatUser}
+              </button>
+            ))}
+
             <div className="add-chat">
-              <h4>Add New Chat</h4>
               <input
                 type="text"
                 placeholder="New recipient"
@@ -87,23 +113,15 @@ const Chat = () => {
               />
               <button onClick={addChatWindow}>Add Chat</button>
             </div>
-
-            {/* Active chats */}
-            <div className="active-chats">
-              {activeChats.map((chatUser, index) => (
-                <button key={index} onClick={() => setRecipient(chatUser)}>
-                  Chat with {chatUser}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Main Chat Area */}
+          {/* Main Chat Box */}
           <div className="chat-box">
+            <h4>Chat with {recipient || "..."}</h4>
             <div className="messages">
               {chat.map((msg, i) => (
                 <p key={i} className="message">
-                  <strong>{msg.username}:</strong> {msg.message}
+                  <strong>{msg.sender}:</strong> {msg.message}
                 </p>
               ))}
             </div>
@@ -114,9 +132,9 @@ const Chat = () => {
                 placeholder="Type your message..."
                 onChange={(e) => setMessage(e.target.value)}
                 value={message}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage(recipient)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               />
-              <button onClick={() => sendMessage(recipient)}>Send</button>
+              <button onClick={sendMessage}>Send</button>
             </div>
           </div>
         </div>
