@@ -1,0 +1,139 @@
+/* General styles for the chat */
+.chat-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Vertically center the container */
+    height: 100vh;
+    background-color: #f0f2f5;
+  }
+  
+  .chat-wrapper {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 80vh;
+  }
+  
+  .sidebar {
+    width: 25%;
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Keep content at the top */
+    border-radius: 10px;
+    height: 100%;
+  }
+  
+  .sidebar h3 {
+    margin-bottom: 10px;
+  }
+  
+  .sidebar input {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .add-chat {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .add-chat input {
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    width: 80%;
+    border-radius: 4px;
+  }
+  
+  .add-chat button {
+    padding: 10px 20px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .add-chat button:hover {
+    background-color: #003f7f;
+  }
+  
+  .active-chats {
+    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .active-chats button {
+    background-color: #0056b3;
+    color: white;
+    padding: 8px;
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .active-chats button:hover {
+    background-color: #003f7f;
+  }
+  
+  /* Main chat box */
+  .chat-box {
+    flex: 1;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-left: 20px;
+  }
+  
+  .messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .message {
+    background-color: #e1f3ff;
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 80%;
+  }
+  
+  .input-area {
+    display: flex;
+    border-top: 1px solid #ccc;
+  }
+  
+  .input-area input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+  }
+  
+  .input-area button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .input-area button:hover {
+    background-color: #0056b3;
+  }
+  
